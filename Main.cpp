@@ -15,8 +15,10 @@ struct vertex {
 
 const int size = 20;
 
+int findIndex(vertex** list, char* n);
 void addVertex(vertex** list);
 void addEdge(vertex** list, int** table);
+void removeEdge(vertex** list, int** table);
 
 int main() {
 
@@ -49,6 +51,10 @@ int main() {
     else if (strcmp(input, "add edge") == 0) {
       addEdge(list, adjacencyTable);
     }
+
+    else if (strcmp(input, "remove edge") == 0) {
+      removeEdge(list, adjacencyTable);
+    }
     
     else if (strcmp(input, "print") == 0) {
 
@@ -61,7 +67,7 @@ int main() {
       cout << endl;
       for (int i = 0; i < size; i++) {
 	for (int j = 0; j < size; j++) {
-	  cout << adjacencyTable[j][i] << " ";
+	  cout << adjacencyTable[i][j] << " ";
 	}
 
 	cout << endl;
@@ -76,9 +82,58 @@ int main() {
   
 }
 
+void removeEdge(vertex** list, int** table) {
+
+  char* input = new char[50];
+  int fIndex = 0;
+  int sIndex = 0;
+
+  cout << "what is the first vertex of the edge" << endl;
+  cin.get(input, 50);
+  cin.get();
+
+  fIndex = findIndex(list, input);
+
+  if (fIndex == -1) {
+    cout << "vertex not foud" << endl;
+    return;
+  }
+
+  cout << "what is the second vertex of the edge" << endl;
+  cin.get(input, 50);
+  cin.get();
+
+  sIndex = findIndex(list, input);
+
+  if (sIndex == -1) {
+    cout << "vertex not found" << endl;
+    return;
+  }
+
+  table[fIndex][sIndex] = -1;
+  
+}
+
+int findIndex(vertex** list, char* n) {
+
+  int index = 0;
+
+  while (list[index] != NULL && strcmp(list[index]->name, n) != 0) {
+    index++;
+  }
+
+  if (list[index] == NULL || strcmp(list[index]->name, n) != 0) {
+    return -1;
+  }
+  else {
+    return index;
+  }
+  
+}
+
 void addEdge(vertex** list, int** table) {
 
-  char input[50];
+  char* input = new char[50];
   int data = 0;
   int fIndex = 0;
   int sIndex = 0;
@@ -87,11 +142,9 @@ void addEdge(vertex** list, int** table) {
   cin.get(input, 50);
   cin.get();
 
-  while (list[fIndex] != NULL && strcmp(list[fIndex]->name, input) != 0) {
-    fIndex++;
-  }
-
-  if (list[fIndex] == NULL || strcmp(list[fIndex]->name, input) != 0) {
+  fIndex = findIndex(list, input);
+  
+  if (fIndex == -1) {
     cout << "the vertex is inexistent" << endl;
     return;
   }
@@ -100,11 +153,9 @@ void addEdge(vertex** list, int** table) {
   cin.get(input, 50);
   cin.get();
 
-  while (list[sIndex] != NULL && strcmp(list[sIndex]->name, input) != 0) {
-    sIndex++;
-  }
-
-  if (list[sIndex] == NULL || strcmp(list[sIndex]->name, input) != 0) {
+  sIndex = findIndex(list, input);
+  
+  if (sIndex == -1) {
     cout << "the vertex is inexistent" << endl;
     return;
   }
@@ -124,7 +175,7 @@ void addEdge(vertex** list, int** table) {
 	table[fIndex][sIndex] = data;
       }
       else {
-	cout << "an edge alread exists" << endl;
+	cout << "an edge already exists" << endl;
       }
     }
     else {
