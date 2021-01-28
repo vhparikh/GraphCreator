@@ -19,6 +19,7 @@ int findIndex(vertex** list, char* n);
 void addVertex(vertex** list);
 void addEdge(vertex** list, int** table);
 void removeEdge(vertex** list, int** table);
+void removeVertex(vertex** list, int** table);
 
 int main() {
 
@@ -55,6 +56,10 @@ int main() {
     else if (strcmp(input, "remove edge") == 0) {
       removeEdge(list, adjacencyTable);
     }
+
+    else if (strcmp(input, "remove vertex") == 0) {
+      removeVertex(list, adjacencyTable);
+    }
     
     else if (strcmp(input, "print") == 0) {
 
@@ -80,6 +85,31 @@ int main() {
     
   }
   
+}
+
+void removeVertex(vertex** list, int** table) {
+
+  char* input = new char[50];
+  int index = 0;
+  
+  cout << "what is the vertex you would like to delete" << endl;
+  cin.get(input, 50);
+  cin.get();
+
+  index = findIndex(list, input);
+
+  if (index == -1) {
+    cout << "vertex not found" << endl;
+    return;
+  }
+
+  for (int i = 0; i < size; i++) {
+    table[index][i] = -1;
+    table[i][index] = -1;
+  }
+
+  delete list[index];
+  list[index] = NULL;
 }
 
 void removeEdge(vertex** list, int** table) {
