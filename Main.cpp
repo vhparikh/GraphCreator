@@ -1,25 +1,54 @@
+//reference for shortest path https://www.youtube.com/watch?v=XB4MIexjvY0
+
 #include <iostream>
 #include <cstring>
+#include <limits>
+#include <vector>
+#include <iterator>
+#include <iomanip>
 
 using namespace std;
 
-struct vertex {
 
+const int size = 20;                                                                                                  
+const int infinity = numeric_limits<int>::max();
+
+struct vertex {
+  
   char* name;
 
   vertex(char* newN) {
     name = newN;
   }
-
 };
 
-const int size = 20;
+struct properties {
+
+  vertex* v;
+  int cost;
+  vector<vertex*> path;
+  bool flagged;
+
+  properties() {
+    v = NULL;
+    cost = infinity;
+    flagged = false;
+  }
+
+  properties(vertex* newV) {
+    v = newV;
+    cost = infinity;
+    flagged = false;
+  }
+};
 
 int findIndex(vertex** list, char* n);
 void addVertex(vertex** list);
 void addEdge(vertex** list, int** table);
 void removeEdge(vertex** list, int** table);
 void removeVertex(vertex** list, int** table);
+void callShortPath(vertex** list, int** table);
+void shortPath(properties** pList, int** table, vertex** list, int eIndex);
 
 int main() {
 
@@ -60,6 +89,10 @@ int main() {
     else if (strcmp(input, "remove vertex") == 0) {
       removeVertex(list, adjacencyTable);
     }
+
+    else if (strcmp(input, "short path") == 0) {
+      callShortPath(list, adjacencyTable);
+    }
     
     else if (strcmp(input, "print") == 0) {
 
@@ -85,6 +118,100 @@ int main() {
     
   }
   
+}
+
+void shortPath(properties** pList, int** table, vertex** list, int eIndex) {
+
+  int lowCost = infinity;
+  int sIndex = -1;
+
+  for(int i = 0; i < size; i++) {
+
+    if (pList[i]->v != NULL && pList[i]->cost < lowCost && pList[i]->flagged == false) {
+      lowCost = pList[i]->cost;
+      sIndex = i;
+    }
+  }
+
+  if (sIndex == -1) {
+    return;
+  }
+
+  if (sIndex == eIndex) {
+    return;
+  }
+
+  pList[sIndex]->flagged = true;
+  
+  for (int i = 0; i < size; i++) {
+
+    if (table[sIndex][i] != -1 && pList[sIndex]->cost + table[sIndex][i] < pList[i]->cost) {
+      pList[i]->cost = pList[sIndex]->cost + table[sIndex][i];
+      pList[i]->path.clear();
+      
+      for (vector<vertex*>::iterator it = pList[sIndex]->path.begin(); it != pList[sIndex]->path.end(); it++) {
+	pList[i]->path.push_back(*it);
+      }
+
+      pList[i]->path.push_back(list[i]);
+    }
+  }
+
+  shortPath(pList, table, list, eIndex);
+}
+
+void callShortPath(vertex** list, int** table) {
+
+  char* input = new char[50];
+  int fIndex = 0;
+  int sIndex = 0;
+  
+  cout << "what is the starting vertex" << endl;
+  cin.get(input, 50);
+  cin.get();
+
+  fIndex = findIndex(list, input);
+
+  if (fIndex == -1) {
+    cout << "vertex not found" << endl;
+    return;
+  }
+
+  cout << "what is the ending vertex" << endl;
+  cin.get(input, 50);
+  cin.get();
+
+  sIndex = findIndex(list, input);
+
+  if (sIndex == -1) {
+    cout << "vertex not found" << endl;
+    return;
+  }
+
+
+  properties* pList[size];
+
+  for(int i = 0; i < size; i++) {
+    pList[i] = new properties(list[i]);
+  }
+
+  pList[fIndex]->cost = 0;
+  pList[fIndex]->path.push_back(list[fIndex]);
+  shortPath(pList, table, list, sIndex);
+
+  if (pList[sIndex]->cost == infinity) {
+    cout << "there is no path from these two vertices" << endl;
+  }
+  else {
+    cout << "shortest path is: ";
+
+    for (vector<vertex*>::iterator it = pList[sIndex]->path.begin(); it != pList[sIndex]->path.end(); it++) {
+      cout << (*it)->name  << " ";
+    }
+  
+    cout << endl;
+    cout << "cost of shortest path is: " << pList[sIndex]->cost << endl;
+  }
 }
 
 void removeVertex(vertex** list, int** table) {
